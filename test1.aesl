@@ -1,0 +1,54 @@
+<!DOCTYPE aesl-source>
+<network>
+
+
+<!--list of global events-->
+
+
+<!--list of constants-->
+
+
+<!--show keywords state-->
+<keywords flag="true"/>
+
+
+<!--node thymio-II-->
+<node nodeId="1" name="thymio-II">#constants
+var PREPARATION_PERIOD = 2000
+var FORWARD_PERIOD = 8000
+var TURN_PERIOD = 5000
+
+var state = 0
+
+#cleanup
+timer.period[0] = 0
+timer.period[1] = 0
+call sound.system(-1)
+
+timer.period[0] = PREPARATION_PERIOD
+state = 1
+onevent timer0
+	if state == 1 then
+    	call leds.top(32,32,32)
+    	motor.left.target = 500
+    	motor.right.target = 500
+    	timer.period[1] = FORWARD_PERIOD
+    	state = 2
+	end
+
+onevent timer1
+	if state == 2 then
+		call leds.top(0,0,0)
+		motor.left.target = 100
+		motor.right.target = 0
+		timer.period[1] = TURN_PERIOD
+		state = 3
+		
+	elseif state == 3 then
+		call leds.top(32,32,32)
+		motor.left.target = 0
+		motor.right.target = 0
+	end</node>
+
+
+</network>

@@ -1,0 +1,13 @@
+Information
+
+Initially, your Wireless Thymio robot is correctly configured and ready to use with the associated dongle, no need to configure anything for normal use !
+
+For more Thymio robots and/or dongles to be in the same network, you must satisfy the following conditions:
+
+ - all on the same radio channel = 1
+ - all have the same network identifier = 0x7131
+ - all have a unique node identifier (no nodes having the same nodeID)
+
+
+069 a été pairé avec le dongle 031, avec les réglages du dessus
+

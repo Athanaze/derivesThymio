@@ -1,0 +1,62 @@
+<!DOCTYPE aesl-source>
+<network>
+
+
+<!--list of global events-->
+
+
+<!--list of constants-->
+
+
+<!--show keywords state-->
+<keywords flag="true"/>
+
+
+<!--node thymio-II-->
+<node nodeId="1" name="thymio-II">var state = 0
+
+sub avancer
+	motor.left.target = 500
+	motor.right.target = 500
+
+sub arreter
+	motor.left.target = 0
+	motor.right.target = 0
+
+sub turnLeft
+	motor.left.target = 500
+	motor.right.target = 0
+
+
+onevent timer1
+  if state == 1 then
+    timer.period[1] = 0
+   	callsub arreter
+   	timer.period[1] = 2000
+	state = 2
+    call leds.top(32,32,32)
+  end
+  
+  if state == 2 then
+  	timer.period[1] = 0
+  	call leds.top(32,0,32)
+  	callsub turnLeft
+  end
+
+
+
+onevent button.forward
+	if button.forward == 1 then
+		timer.period[1] = 5000
+		state = 1
+		callsub avancer
+    	call leds.top(0,0,32)
+	end
+
+onevent button.backward
+	if button.backward == 1 then
+		callsub arreter
+	end</node>
+
+
+</network>
