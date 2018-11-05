@@ -1,3 +1,4 @@
 Derives Thymio
 
-Obstacles & lines version
+
+Ultimate AI Driven Thymio Art Piece
