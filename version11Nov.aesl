@@ -13,7 +13,7 @@
 
 
 <!--node thymio-II-->
-<node nodeId="10692" name="thymio-II">#Evitement d obstacles pour pastille miroir
+<node nodeId="14116" name="thymio-II">#Evitement d obstacles pour pastille miroir
 # ET LIGNE
 
 
@@ -21,15 +21,6 @@
 # VERSION AVEC UN TIMER AU DEBUT
 ####################################
 
-
-####################################
-# CODE COULEUR
-#
-# Orange = dans son timer de départ (5 sec.)
-# Blanc = il voit une ligne NOIRE ou le vide, il recule
-# Bleu = il tourne a droite
-# Rouge = il tourne a gauche
-# Violet = il recule
 # Jaune = il avance
 
 var SPEED = 500
@@ -60,30 +51,25 @@ var WAITING_TO_RUN = 8
 var RUN = 9
 var turnDirection = 0
 
-
-
 var LINE_VALUE = 200
 #cleanup
 call sound.system(-1)
 timer.period[1] = 0
-
 timer.period[0] = START_TIMER_DURATION
-#Orange
-call leds.top(32,16,0)
+
+call leds.top(32,32,32)
 state = START
 onevent timer0
 	if state == START then
 		state = WAITING_SIGNAL
-		call leds.top(0,0,32)
+		call leds.top(0,0,0)
 		
 	elseif state == RIGHT then
-    	#call leds.top(0,0,32)
     	motor.left.target = TURN_SPEED
     	motor.right.target = TURN_SPEED_2
     	callsub turn
 		
 	elseif state == LEFT then
-		#call leds.top(32,0,0)
     	motor.left.target = TURN_SPEED_2
     	motor.right.target = TURN_SPEED
     	callsub turn
@@ -110,6 +96,9 @@ onevent timer0
 
 # 10 times per second
 onevent prox
+	call leds.bottom.left(0,0,0)
+	call leds.bottom.right(0,0,0)
+	call leds.prox.h(0, 0, 0, 0, 0, 0, 0, 0)
 	if state == CONTINUE then
 		callsub checkSensor
 	elseif state ==RIGHT then
@@ -122,7 +111,6 @@ onevent prox
 	
 sub checkSignal
 	if prox.horizontal[2] > 0 then
-		call leds.top(0,32,0)
 		state = WAITING_TO_RUN
 		timer.period[0] = WAITING_TO_RUN_DURATION
 	end
@@ -164,7 +152,6 @@ sub stop
 
 sub reculerEtTourner
 	res = prox.horizontal[0]+prox.horizontal[1]-prox.horizontal[3]-prox.horizontal[4]
-	call leds.top(32,0,32)
 	if res &lt; 0 then
 		turnDirection = LEFT
 		motor.left.target = -TURN_SPEED_2
@@ -180,7 +167,6 @@ sub reculerEtTourner
 	state = COME_BACK
 
 sub forward
-	call leds.top(32,32,32)
 	motor.left.target = SPEED
 	motor.right.target = SPEED
 
