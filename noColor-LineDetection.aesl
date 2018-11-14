@@ -1,0 +1,184 @@
+<!DOCTYPE aesl-source>
+<network>
+
+
+<!--list of global events-->
+
+
+<!--list of constants-->
+
+
+<!--show keywords state-->
+<keywords flag="true"/>
+
+
+<!--node thymio-II-->
+<node nodeId="52789" name="thymio-II">#Evitement d obstacles pour pastille miroir
+# ET LIGNE
+
+
+####################################
+# VERSION AVEC UN TIMER AU DEBUT
+####################################
+
+var SPEED = 500
+var res = 0
+
+#Durations (1000 = 1 sec)
+var START_TIMER_DURATION = 20000
+var BACKWARD_DURATION = 500
+var TURN_DURATION = 1500
+var COME_BACK_DURATION = 2000
+var WAITING_TO_RUN_DURATION = 5000
+var RUN_DURATION = 3000
+#Speeds
+var TURN_SPEED = 500
+var TURN_SPEED_2 = 0
+
+#States /!\ ne pas modifier !
+var state = 0
+
+var COME_BACK = 6
+var RIGHT = 1
+var LEFT = 2
+
+var CONTINUE = 4
+var START = 5
+var WAITING_SIGNAL = 7
+var WAITING_TO_RUN = 8
+var RUN = 9
+var turnDirection = 0
+#Higher is whiter
+var LINE_COLOR = 940
+#cleanup
+call sound.system(-1)
+timer.period[1] = 0
+timer.period[0] = START_TIMER_DURATION
+
+call leds.top(32,32,32)
+state = START
+onevent timer0
+	if state == START then
+		state = WAITING_SIGNAL
+		call leds.top(0,0,0)
+		
+	elseif state == RIGHT then
+    	motor.left.target = TURN_SPEED
+    	motor.right.target = TURN_SPEED_2
+    	callsub turn
+		
+	elseif state == LEFT then
+    	motor.left.target = TURN_SPEED_2
+    	motor.right.target = TURN_SPEED
+    	callsub turn
+    	
+    elseif state == CONTINUE then
+    	callsub forward
+    
+    elseif state == COME_BACK then
+    	motor.left.target = -SPEED
+    	motor.right.target = -SPEED
+    	timer.period[0] = COME_BACK_DURATION
+    	state = turnDirection
+		#Reset the turn direction
+       	turnDirection = 0
+    elseif state == WAITING_TO_RUN then
+    	state = RUN
+    	timer.period[0] = RUN_DURATION
+    	callsub forward
+    
+    elseif state == RUN then
+    	state = CONTINUE
+    	callsub forward
+	end
+
+# 10 times per second
+onevent prox
+	call leds.bottom.left(0,0,0)
+	call leds.bottom.right(0,0,0)
+	call leds.prox.h(0, 0, 0, 0, 0, 0, 0, 0)
+	#Almost always check the sensor's data
+	if state == CONTINUE then
+		callsub checkSensor
+	elseif state ==RIGHT then
+		callsub checkSensor
+	elseif state == LEFT then
+		callsub checkSensor
+	elseif state == RUN then
+		callsub checkSensor
+	
+	#Check for the starting signal
+	elseif state == WAITING_SIGNAL then
+		callsub checkSignal
+	end
+	
+sub checkSignal
+	if prox.horizontal[2] > 0 then
+		state = WAITING_TO_RUN
+		timer.period[0] = WAITING_TO_RUN_DURATION
+	end
+
+sub checkSensor
+	#Front prox sensors detection
+	if prox.horizontal[0] > 0 then
+		callsub stop
+		callsub reculerEtTourner
+	
+	elseif prox.horizontal[1] > 0 then
+		callsub stop
+		callsub reculerEtTourner
+	
+	elseif prox.horizontal[2] > 0 then
+		callsub stop
+		callsub reculerEtTourner
+	
+	elseif prox.horizontal[3] > 0 then
+		callsub stop
+		callsub reculerEtTourner
+		
+	elseif prox.horizontal[4] > 0 then
+		callsub stop
+		callsub reculerEtTourner
+	#Line detection
+	elseif prox.ground.delta[0] > LINE_COLOR then
+		#Line detected
+		callsub stop
+		callsub reculerEtTourner
+	
+	elseif prox.ground.delta[1] > LINE_COLOR then
+		#Line detected
+		callsub stop
+		callsub reculerEtTourner
+	end
+
+sub stop
+	motor.left.target = 0
+	motor.right.target = 0
+
+sub reculerEtTourner
+	res = prox.horizontal[0]+prox.horizontal[1]-prox.horizontal[3]-prox.horizontal[4]
+	if res &lt; 0 then
+		turnDirection = LEFT
+		motor.left.target = -TURN_SPEED_2
+		motor.right.target = -TURN_SPEED
+		timer.period[0] = BACKWARD_DURATION
+	else
+		turnDirection = RIGHT
+		motor.left.target = -TURN_SPEED
+		motor.right.target = -TURN_SPEED_2
+		timer.period[0] = BACKWARD_DURATION
+	end
+	
+	state = COME_BACK
+
+sub forward
+	motor.left.target = SPEED
+	motor.right.target = SPEED
+
+sub turn
+	state = CONTINUE
+	timer.period[0] = TURN_DURATION
+	</node>
+
+
+</network>
